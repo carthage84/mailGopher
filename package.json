@@ -1,0 +1,35 @@
+{
+  "name": "mailgopher",
+  "version": "1.0.0",
+  "description": "Personal multi-mailbox email importer. Fetch from POP3/IMAP and insert into Gmail via the Gmail API.",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "mailgopher": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "auth": "node src/cli/auth.js",
+    "sync-once": "node src/index.js --once",
+    "test:parse": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "email",
+    "gmail",
+    "imap",
+    "pop3",
+    "import",
+    "mailporter"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "googleapis": "^174.0.1",
+    "imapflow": "^1.7.0",
+    "mailparser": "^3.9.15",
+    "open": "^11.0.0",
+    "yaml": "^2.9.0"
+  }
+}
