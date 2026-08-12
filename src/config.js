@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import YAML from 'yaml';
 import { log } from './logger.js';
-import { isSecretRef, applySecretsToConfig } from './secrets/resolve.js';
+import { isSecretRef, applySecretsToConfig } from './credentials/resolve.js';
 
 const DEFAULTS = {
   settings: {

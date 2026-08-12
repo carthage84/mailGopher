@@ -1,0 +1,26 @@
+# systemd timer — run the oneshot MailGopher unit on a schedule.
+# Requires mailgopher.service to be the oneshot unit (mailgopher-oneshot.service.example).
+#
+#   sudo cp deploy/mailgopher.timer.example /etc/systemd/system/mailgopher.timer
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now mailgopher.timer
+#   systemctl list-timers mailgopher.timer
+#
+# Calendar examples (OnCalendar=):
+#   *:0/15          every 15 minutes
+#   hourly
+#   *:0/5           every 5 minutes
+#   *-*-* 06:30:00  daily at 06:30
+
+[Unit]
+Description=Run MailGopher import on a schedule
+
+[Timer]
+OnBootSec=2min
+OnCalendar=*:0/15
+Persistent=true
+RandomizedDelaySec=30
+Unit=mailgopher.service
+
+[Install]
+WantedBy=timers.target

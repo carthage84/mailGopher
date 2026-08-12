@@ -1,0 +1,41 @@
+# Example config.yaml for a systemd install.
+# Install as /etc/mailgopher/config.yaml (no secrets in this file).
+#
+# Secret names on the right of file:${CREDENTIALS_DIRECTORY}/…
+# MUST match the left-hand name of LoadCredential= in mailgopher.service.
+
+gmailAccounts:
+  personal:
+    email: you@gmail.com
+    clientId: YOUR_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com
+    clientSecret: "file:${CREDENTIALS_DIRECTORY}/gmail_personal_client_secret"
+    refreshToken: "file:${CREDENTIALS_DIRECTORY}/gmail_personal_refresh"
+
+jobs:
+  - id: yahoo-imap-to-personal
+    enabled: true
+    source:
+      protocol: imap
+      host: imap.mail.yahoo.com
+      port: 993
+      secure: true
+      user: you@yahoo.com
+      password: "file:${CREDENTIALS_DIRECTORY}/yahoo_password"
+      folder: INBOX
+      idle: true
+    destination:
+      gmailAccount: personal
+      labels:
+        - Imported/Yahoo
+    options:
+      intervalMinutes: 15
+      leaveOnServer: true
+      markAsRead: false
+      deleteAfterImport: false
+      maxMessagesPerRun: 100
+
+settings:
+  # Must be writable by the service user and listed in ReadWritePaths=
+  stateDir: /opt/mailgopher/data
+  logLevel: info
+  allowPlaintextSecrets: false

@@ -1,0 +1,43 @@
+# systemd oneshot unit — run all jobs once, then exit.
+# Pair with mailgopher.timer.example (recommended if you do not need IMAP IDLE).
+#
+# Install both:
+#   sudo cp deploy/mailgopher-oneshot.service.example /etc/systemd/system/mailgopher.service
+#   sudo cp deploy/mailgopher.timer.example /etc/systemd/system/mailgopher.timer
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now mailgopher.timer
+#
+# Manual run (same as the timer firing):
+#   sudo systemctl start mailgopher.service
+
+[Unit]
+Description=MailGopher email importer (one-shot)
+Documentation=file:/opt/mailgopher/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=mailgopher
+Group=mailgopher
+WorkingDirectory=/opt/mailgopher
+
+Environment=MAILGOPHER_CONFIG=/etc/mailgopher/config.yaml
+Environment=NODE_ENV=production
+
+LoadCredential=yahoo_password:/etc/mailgopher/secrets/yahoo.password
+LoadCredential=gmail_personal_client_secret:/etc/mailgopher/secrets/gmail.personal.clientSecret
+LoadCredential=gmail_personal_refresh:/etc/mailgopher/secrets/gmail.personal.refreshToken
+
+ExecStart=/usr/bin/node /opt/mailgopher/src/index.js --once
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mailgopher
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/mailgopher/data
+ReadOnlyPaths=/etc/mailgopher

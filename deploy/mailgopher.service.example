@@ -1,17 +1,20 @@
-# Example systemd unit for MailGopher on Linux.
-# Copy to /etc/systemd/system/mailgopher.service and adjust paths.
+# systemd unit — long-running MailGopher (polling + optional IMAP IDLE).
 #
-# Secrets stay outside the unit file: LoadCredential copies them into
-# $CREDENTIALS_DIRECTORY with tight permissions for this service only.
+# Full walkthrough: README.md → "Run as a systemd service (Linux)"
 #
-# Install:
-#   sudo install -d -m 700 /etc/mailgopher/secrets
-#   sudo nano /etc/mailgopher/secrets/yahoo.password   # paste app password
-#   sudo chmod 600 /etc/mailgopher/secrets/*
-#   sudo systemctl daemon-reload && sudo systemctl enable --now mailgopher
+# Paths used by this example:
+#   /opt/mailgopher              app (git clone + npm install)
+#   /opt/mailgopher/data         writeable state (dedupe cursors)
+#   /etc/mailgopher/config.yaml  non-secret config
+#   /etc/mailgopher/secrets/*    secret files (chmod 600, root-owned)
+#
+# After editing this file:
+#   sudo systemctl daemon-reload
+#   sudo systemctl restart mailgopher
 
 [Unit]
-Description=MailGopher email importer
+Description=MailGopher email importer (POP3/IMAP → Gmail)
+Documentation=file:/opt/mailgopher/README.md
 After=network-online.target
 Wants=network-online.target
 
@@ -21,29 +24,40 @@ User=mailgopher
 Group=mailgopher
 WorkingDirectory=/opt/mailgopher
 
-# Non-secret config path
 Environment=MAILGOPHER_CONFIG=/etc/mailgopher/config.yaml
 Environment=NODE_ENV=production
 
-# Inject secret files → available as ${CREDENTIALS_DIRECTORY}/<name>
+# systemd copies each source file into $CREDENTIALS_DIRECTORY/<name>
+# with permissions only this service can read. The *name* (left of ':')
+# is what config.yaml must use:
+#   password: "file:${CREDENTIALS_DIRECTORY}/yahoo_password"
+#
+# Add one LoadCredential= line per secret. Names must be unique.
 LoadCredential=yahoo_password:/etc/mailgopher/secrets/yahoo.password
 LoadCredential=gmail_personal_client_secret:/etc/mailgopher/secrets/gmail.personal.clientSecret
 LoadCredential=gmail_personal_refresh:/etc/mailgopher/secrets/gmail.personal.refreshToken
 
-# Optional: whole EnvironmentFile (chmod 600) if you prefer env: refs
+# Alternative to LoadCredential: a chmod-600 env file (use env: refs in config)
 # EnvironmentFile=-/etc/mailgopher/env
 
 ExecStart=/usr/bin/node /opt/mailgopher/src/index.js
 Restart=on-failure
 RestartSec=30
+# Give IMAP IDLE / Gmail a moment to close sockets
+TimeoutStopSec=20
 
-# Hardening (adjust as needed)
+# Logs go to the journal (journalctl -u mailgopher)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mailgopher
+
+# Hardening — keep in sync with the paths above
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
+# Dedupe state; must match settings.stateDir in config.yaml
 ReadWritePaths=/opt/mailgopher/data
-# Allow reading config + credential sources
 ReadOnlyPaths=/etc/mailgopher
 
 [Install]

@@ -10,7 +10,7 @@ import {
   resolveSecretRefs,
   findPlaintextSecretFields,
   applySecretsToConfig,
-} from '../src/secrets/resolve.js';
+} from '../src/credentials/resolve.js';
 
 describe('secret resolve', () => {
   let dir;

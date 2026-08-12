@@ -15,7 +15,7 @@ import YAML from 'yaml';
 import { resolveConfigPath } from '../config.js';
 import { createOAuthClient, SCOPES } from '../gmail/client.js';
 import { log, setLogLevel } from '../logger.js';
-import { isSecretRef, resolveSecretValue } from '../secrets/resolve.js';
+import { isSecretRef, resolveSecretValue } from '../credentials/resolve.js';
 
 const REDIRECT_PORT = 53682;
 const REDIRECT_URI = `http://127.0.0.1:${REDIRECT_PORT}/oauth2callback`;
