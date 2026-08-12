@@ -66,7 +66,7 @@ settings:
 
 ```bash
 sudo install -d -m 700 /etc/mailgopher/secrets
-sudoedit /etc/mailgopher/secrets/yahoo.password   # paste secret, save
+sudo nano /etc/mailgopher/secrets/yahoo.password   # paste secret, save
 sudo chmod 600 /etc/mailgopher/secrets/*
 ```
 
