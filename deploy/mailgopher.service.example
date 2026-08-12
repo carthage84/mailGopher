@@ -1,0 +1,50 @@
+# Example systemd unit for MailGopher on Linux.
+# Copy to /etc/systemd/system/mailgopher.service and adjust paths.
+#
+# Secrets stay outside the unit file: LoadCredential copies them into
+# $CREDENTIALS_DIRECTORY with tight permissions for this service only.
+#
+# Install:
+#   sudo install -d -m 700 /etc/mailgopher/secrets
+#   sudo nano /etc/mailgopher/secrets/yahoo.password   # paste app password
+#   sudo chmod 600 /etc/mailgopher/secrets/*
+#   sudo systemctl daemon-reload && sudo systemctl enable --now mailgopher
+
+[Unit]
+Description=MailGopher email importer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mailgopher
+Group=mailgopher
+WorkingDirectory=/opt/mailgopher
+
+# Non-secret config path
+Environment=MAILGOPHER_CONFIG=/etc/mailgopher/config.yaml
+Environment=NODE_ENV=production
+
+# Inject secret files → available as ${CREDENTIALS_DIRECTORY}/<name>
+LoadCredential=yahoo_password:/etc/mailgopher/secrets/yahoo.password
+LoadCredential=gmail_personal_client_secret:/etc/mailgopher/secrets/gmail.personal.clientSecret
+LoadCredential=gmail_personal_refresh:/etc/mailgopher/secrets/gmail.personal.refreshToken
+
+# Optional: whole EnvironmentFile (chmod 600) if you prefer env: refs
+# EnvironmentFile=-/etc/mailgopher/env
+
+ExecStart=/usr/bin/node /opt/mailgopher/src/index.js
+Restart=on-failure
+RestartSec=30
+
+# Hardening (adjust as needed)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/mailgopher/data
+# Allow reading config + credential sources
+ReadOnlyPaths=/etc/mailgopher
+
+[Install]
+WantedBy=multi-user.target
