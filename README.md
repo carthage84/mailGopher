@@ -1,6 +1,6 @@
 # MailGopher
 
-Personal emails importer: pull mail from **POP3** / **IMAP** and insert it into one or more **Gmail** accounts via the Gmail API.
+Pull mail from POP3/IMAP mailboxes into one or more Gmail accounts via the Gmail API. Runs as a hardened systemd service with per-secret file credentials, Message-ID dedupe, and optional IMAP IDLE.
 
 ## Features
 
@@ -15,6 +15,16 @@ Personal emails importer: pull mail from **POP3** / **IMAP** and insert it into 
 - Node.js 18+
 - Google Cloud project with **Gmail API** + OAuth client
 - Source mailbox credentials
+
+## Why this exists
+
+Google is removing Gmail's ability to pull mail from external accounts. Gmailify was switched off in January 2026, and new "Check mail from other accounts" setups have been closed since Q1 2026. Existing configurations are expected to stop working in January 2027, for both free Gmail and Workspace.
+
+Google's suggested replacements are provider-side forwarding or adding the account to the Gmail mobile app over IMAP. Neither gives you a single web inbox with your own labels, and forwarding tends to get caught by spam filtering.
+
+mailGopher fills that gap. It runs on your own server, connects to POP3 or IMAP mailboxes, and inserts messages into one or more Gmail accounts through the Gmail API, with Message-ID dedupe and label routing. Free to self-host — the only cost is somewhere to run it.
+
+Google's communication on this has been sparse and the dates have already shifted once, so treat the timeline as best-known rather than final. [Google's support note →](https://support.google.com/mail/answer/%E2%80%A6)
 
 ## Quick start
 
